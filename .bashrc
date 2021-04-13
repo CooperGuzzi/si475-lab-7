@@ -100,6 +100,7 @@ alias we='roslaunch turtlebot_gazebo turtlebot_world.launch world_file:=/home/ad
 alias wl='roslaunch turtlebot_gazebo turtlebot_world.launch world_file:=/home/administrator/catkin_ws/src/turtlebot_simulator/turtlebot_gazebo/worlds/roblab.world'
 alias wb='roslaunch turtlebot_gazebo turtlebot_world.launch world_file:=/home/administrator/catkin_ws/src/turtlebot_simulator/turtlebot_gazebo/worlds/roblab_with_balloons.world'
 alias rc='roslaunch freenect_launch freenect.launch'
+alias nav='roslaunch turtlebot_navigation amcl_demo.launch map_file:=/home/administrator/turtleAPI/map.yaml'
 
 #turtle alias
 source /opt/ros/indigo/setup.bash
