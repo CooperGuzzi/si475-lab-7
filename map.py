@@ -1,0 +1,1 @@
+# reads in adjancency matrix and start+end point, runs djisktas on it
