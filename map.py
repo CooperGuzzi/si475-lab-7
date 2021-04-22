@@ -9,11 +9,11 @@ from math import pow, sqrt
 import argparse
 import networkx as nx
 import matplotlib.pyplot as plt
-#import drive
-
+from drive import Driver
 
 
 def subtract(s1,s2):
+    print(s1,s2)
     s1 = xy(s1)
     s2 = xy(s2)
     return sqrt(pow(s1[0]-s2[0],2)+pow(s1[1]-s2[1],2))
@@ -43,9 +43,11 @@ class Map:
             self.driver = Driver()
             start = self.driver.start()
             self.virtual = False
+        else:
+            start = args.start
         beststart = 100
         beststartnode = 0
-        s1 = "\""+str(args.start)+"\""
+        s1 = "\""+str(start)+"\""
         bestend = 100
         bestendnode = 0
         e1 = "\""+str(args.e)+"\""
@@ -79,13 +81,14 @@ class Map:
         for i in path:
             print(self.graph.nodes[i]['label'])
 
-    def drive(self,driver):
+    def drive(self):
         length, path = nx.single_source_dijkstra(self.graph,"start",target="end",weight='weight')
         print(length)
         print(path)
         for i in path:
             print(self.graph.nodes[i]['label'])
-            self.driver.goto(xy(self.graph.nodes[i]['label']))
+            x,y = xy(self.graph.nodes[i]['label'])
+            self.driver.goto(x,y)
 
 
 

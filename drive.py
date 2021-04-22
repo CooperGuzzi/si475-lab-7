@@ -2,13 +2,71 @@ import math, rospy
 from turtleAPI import robot
 
 class Driver:
-    __init__(self)
-    # make the robot and lists for tracking error
-    r = robot()
-    error_list_pos = []
-    error_list_angle = []
+    def __init__(self):
+        # make the robot and lists for tracking error
+        self.r = robot()
+        self.error_list_pos = []
+        self.error_list_angle = []
+        
+    def goto(self,x,y):
+        goal_pos = (x, y)
 
-    #error function for angle
+        # loop until at position
+        old_ang_error = 0
+        old_pos_error = 0
+        rate = rospy.Rate(20)
+
+        while True:
+            speed_limit = 4
+
+            #current pos
+            try:
+                current_pos = self.r.getMCLPose()
+            except:
+                current_pos = self.r.getPositionTup()
+            print('current pos: ' + str(current_pos))
+            current_angle = current_pos[2]
+
+            #calculate the goal angle
+            relative_x = goal_pos[0]-current_pos[0]
+            relative_y = goal_pos[1]-current_pos[1]
+            goal_angle = math.atan2(relative_y, relative_x)
+            print('goal angle: ' + str(goal_angle))
+            #break if within .1 m
+            if (posDiff(current_pos, goal_pos) < .1 ):
+                break
+
+            #calculate angle speed and lin speed drive
+            ang_error = angleDiff(current_angle, goal_angle)
+            pos_error = posDiff(current_pos, goal_pos)
+            print('error: ' + str(ang_error) + ' ' +str(pos_error))
+
+            #speed
+            ang_speed = pid_speed(-.1, 0, -.01, ang_error, old_ang_error, self.error_list_angle)
+            lin_speed = pid_speed(.05, 0, .01, pos_error, old_pos_error, self.error_list_pos)
+
+            #set speed limit
+            if lin_speed > speed_limit:
+                lin_speed = speed_limit
+
+            self.r.drive(angSpeed=ang_speed, linSpeed=lin_speed)
+            print('speed: ' + str(ang_speed) + ' ' + str(lin_speed))
+
+            #set old values
+            old_ang_error=ang_error
+            old_pos_error=pos_error
+            rate.sleep()
+            print(' ')
+
+        self.r.drive(angSpeed=0, linSpeed=0)
+
+    def start(self):
+        try:
+            return self.r.getMCLPose()
+        except:
+            return self.r.getPositionTup()
+
+            #error function for angle
     def angleDiff(cur_angle, desired):
         # calculate difference
         diff = cur_angle - desired
@@ -41,12 +99,12 @@ class Driver:
 
         # add the error to the integral portion
         if len(error_list) > 5:
-            error_list.pop()
-        error_list.append(error)
+            self.error_list.pop()
+        self.error_list.append(error)
 
         #calculate sum
         error_sum = 0
-        for i in error_list:
+        for i in self.error_list:
             error_sum += i
 
         # kp portion + ki portion
@@ -54,61 +112,3 @@ class Driver:
         to_return += kd * (error - old_error)
 
         return to_return
-
-    def goto(self,x,y):
-        goal_pos = (x, y)
-
-        # loop until at position
-        old_ang_error = 0
-        old_pos_error = 0
-        rate = rospy.Rate(20)
-
-        while True:
-            speed_limit = 4
-
-            #current pos
-            try:
-                current_pos = r.getMCLPose()
-            except:
-                current_pos = r.getPositionTup()
-            print('current pos: ' + str(current_pos))
-            current_angle = current_pos[2]
-
-            #calculate the goal angle
-            relative_x = goal_pos[0]-current_pos[0]
-            relative_y = goal_pos[1]-current_pos[1]
-            goal_angle = math.atan2(relative_y, relative_x)
-            print('goal angle: ' + str(goal_angle))
-            #break if within .1 m
-            if (posDiff(current_pos, goal_pos) < .1 ):
-                break
-
-            #calculate angle speed and lin speed drive
-            ang_error = angleDiff(current_angle, goal_angle)
-            pos_error = posDiff(current_pos, goal_pos)
-            print('error: ' + str(ang_error) + ' ' +str(pos_error))
-
-            #speed
-            ang_speed = pid_speed(-.1, 0, -.01, ang_error, old_ang_error, error_list_angle)
-            lin_speed = pid_speed(.05, 0, .01, pos_error, old_pos_error, error_list_pos)
-
-            #set speed limit
-            if lin_speed > speed_limit:
-                lin_speed = speed_limit
-
-            r.drive(angSpeed=ang_speed, linSpeed=lin_speed)
-            print('speed: ' + str(ang_speed) + ' ' + str(lin_speed))
-
-            #set old values
-            old_ang_error=ang_error
-            old_pos_error=pos_error
-            rate.sleep()
-            print(' ')
-
-        r.drive(angSpeed=0, linSpeed=0)
-
-    def start(self):
-        try:
-            return r.getMCLPose()
-        except:
-            return r.getPositionTup()
