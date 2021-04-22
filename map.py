@@ -1,11 +1,16 @@
-# reads in adjancency matrix and start+end point, runs djisktas on it
+#sudo pip install pydot==1.2.3
+#sudo pip install decorator==4.4.2
+#sudo pip install networkx=2.2.0
+
+#sudo pip install setuptools==20.7.0
+#pip 8.1.1
 
 from math import pow, sqrt
 import argparse
 import networkx as nx
 import matplotlib.pyplot as plt
 #import drive
-#from networkx import Graph
+
 
 
 def subtract(s1,s2):
