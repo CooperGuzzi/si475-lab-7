@@ -12,12 +12,12 @@ class Driver:
     def pid_speed(self,kp, ki, kd, error, old_error, error_list):
         # add the error to the integral portion
         if len(error_list) > 5:
-            self.error_list.pop()
-        self.error_list.append(error)
+            error_list.pop()
+        error_list.append(error)
 
         #calculate sum
         error_sum = 0
-        for i in self.error_list:
+        for i in error_list:
             error_sum += i
 
         # kp portion + ki portion
@@ -34,7 +34,7 @@ class Driver:
         old_pos_error = 0
         rate = rospy.Rate(20)
 
-        while True:
+        while not rospy.is_shutdown():
             speed_limit = 4
 
             #current pos
@@ -60,8 +60,8 @@ class Driver:
             print('error: ' + str(ang_error) + ' ' +str(pos_error))
 
             #speed
-            ang_speed = pid_speed(-.1, 0, -.01, ang_error, old_ang_error, self.error_list_angle)
-            lin_speed = pid_speed(.05, 0, .01, pos_error, old_pos_error, self.error_list_pos)
+            ang_speed = self.pid_speed(-.1, 0, -.01, ang_error, old_ang_error, self.error_list_angle)
+            lin_speed = self.pid_speed(.05, 0, .01, pos_error, old_pos_error, self.error_list_pos)
 
             #set speed limit
             if lin_speed > speed_limit:
