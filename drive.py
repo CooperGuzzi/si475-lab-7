@@ -67,7 +67,10 @@ class Driver:
             speed_limit = 4
 
             #current pos
-            current_pos = r.getPositionTup()
+            try:
+                current_pos = r.getMCLPose()
+            except:
+                current_pos = r.getPositionTup()
             print('current pos: ' + str(current_pos))
             current_angle = current_pos[2]
 
@@ -105,4 +108,7 @@ class Driver:
         r.drive(angSpeed=0, linSpeed=0)
 
     def start(self):
-        return r.getPositionTup()
+        try:
+            return r.getMCLPose()
+        except:
+            return r.getPositionTup()
